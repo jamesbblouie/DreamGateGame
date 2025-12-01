@@ -1,5 +1,10 @@
 Console.WriteLine("Welcome to the Dream Gate...");
-Console.WriteLine("What is your name,traveler?");
+// Ask name + intro all in one box
+const playerName = prompt(
+  "Welcome to the Dream Gate...\n\n" +
+  "You feel a strange energy in the air.\n\n" +
+  "What is your name, traveler?"
+);
 string playerName  = Console.ReadLine();
 Console.WriteLine("Greetings, " +  playerName  + ".");
 int health = 100;
