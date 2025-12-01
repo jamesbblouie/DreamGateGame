@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Dream Gate Game</title>
+
   <style>
     body {
       background: #0b0816;
@@ -11,8 +12,8 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      min-height: 100vh;
       padding: 20px;
+      min-height: 100vh;
     }
 
     #game {
@@ -23,13 +24,6 @@
       padding: 16px;
       box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
       white-space: pre-wrap;
-    }
-
-    h1 {
-      margin-top: 0;
-      color: #4cc9f0;
-      font-size: 1.4rem;
-      text-align: center;
     }
 
     button {
@@ -46,13 +40,9 @@
     button:hover {
       filter: brightness(1.1);
     }
-
-    #log {
-      margin-top: 8px;
-      font-size: 0.95rem;
-    }
   </style>
 </head>
+
 <body>
   <div id="game">
     <h1>Dream Gate Game</h1>
@@ -72,31 +62,32 @@
       logEl.textContent = "";
     }
 
+    startBtn.addEventListener("click", playGame);
+
     function playGame() {
       clearLog();
 
-      // ---- Name + intro ----
+      // ----------- NAME -----------
       let name = prompt(
         "Welcome to the Dream Gate...\n\n" +
         "You feel a strange energy in the air.\n\n" +
         "What is your name, traveler?"
       );
 
-      if (!name || name.trim() === "") {
-        name = "Traveler";
-      }
+      if (!name || name.trim() === "") name = "Traveler";
 
       let health = 100;
+
       log("Welcome to the Dream Gate...");
       log("Greetings, " + name + ".");
       log("Your health is: " + health);
       log("");
 
-      // ---- Door choice ----
+      // ----------- DOOR CHOICE -----------
       const doorChoice = prompt(
         "You stand before two doors...\n\n" +
-        "1 - Enter the blue door (calm, glowing light)\n" +
-        "2 - Enter the dark door (whispers in the shadows)\n\n" +
+        "1 - Enter the blue door (calm glowing light)\n" +
+        "2 - Enter the dark door (distant whispers)\n\n" +
         "Which door do you choose? (1 or 2)"
       );
 
@@ -109,29 +100,31 @@
       } else {
         const dmg = 20;
         log("The darkness whispers as the door closes behind you...");
-        log("Something claws at you in the dark. You lose " + dmg + " health.");
+        log("Something claws at you. You lose " + dmg + " health.");
         health -= dmg;
         log("Your health is now: " + health);
       }
 
       log("");
       log("A shadowy creature appears in front of you!");
+
       const enemyName = "Shadow Beast";
       let enemyHealth = 50;
       let enemyDamage = 30;
+
       log("Enemy: " + enemyName);
       log("Enemy health: " + enemyHealth);
       log("");
 
-      // ---- Battle loop: L / H / R ----
+      // ----------- BATTLE LOOP -----------
       while (enemyHealth > 0 && health > 0) {
         const action = prompt(
           "Your health: " + health + "\n" +
           enemyName + " health: " + enemyHealth + "\n\n" +
-          "(L)ight attack - safer, smaller hit\n" +
-          "(H)eavy attack - big hit, might miss\n" +
+          "(L)ight attack - safe, small hit\n" +
+          "(H)eavy attack - big hit, risk of miss\n" +
           "(R)un away\n\n" +
-          "Type L, H, or R."
+          "Type L, H, or R:"
         );
 
         if (!action) {
@@ -142,48 +135,49 @@
         const choice = action.toLowerCase();
 
         if (choice === "l") {
-          // Light attack
-          const playerDamage = 15;
-          log("You use a light attack!");
-          log("You deal " + playerDamage + " damage.");
-          enemyHealth -= playerDamage;
-          log(enemyName + " health is now: " + enemyHealth);
+          // LIGHT ATTACK
+          const dmg = 15;
+          log("You use a LIGHT attack!");
+          log("You deal " + dmg + " damage.");
+          enemyHealth -= dmg;
+          log(enemyName + " health: " + enemyHealth);
           log("");
 
           if (enemyHealth <= 0) break;
 
-          // Enemy counter
           log("The " + enemyName + " strikes back!");
           log("You take " + enemyDamage + " damage.");
           health -= enemyDamage;
           log("Your health is now: " + health);
           log("");
+
         } else if (choice === "h") {
-          // Heavy attack with chance to miss
-          const hitRoll = Math.floor(Math.random() * 100); // 0–99
+          // HEAVY ATTACK (70% hit chance)
+          const hitRoll = Math.floor(Math.random() * 100);
           if (hitRoll < 70) {
-            const playerDamage = 30;
-            log("You charge up a HEAVY attack!");
-            log("You smash the " + enemyName + " for " + playerDamage + " damage!");
-            enemyHealth -= playerDamage;
-            log(enemyName + " health is now: " + enemyHealth);
+            const dmg = 30;
+            log("You unleash a HEAVY attack!");
+            log("You deal " + dmg + " damage!");
+            enemyHealth -= dmg;
+            log(enemyName + " health: " + enemyHealth);
           } else {
-            log("You swing a HEAVY attack... but you MISS!");
+            log("Your HEAVY attack MISSES!");
           }
           log("");
 
           if (enemyHealth <= 0) break;
 
-          const counterDamage = enemyDamage + 10;
-          log("The " + enemyName + " counters your heavy move!");
-          log("You take " + counterDamage + " damage.");
-          health -= counterDamage;
+          const counter = enemyDamage + 10;
+          log("The " + enemyName + " counters HARD!");
+          log("You take " + counter + " damage.");
+          health -= counter;
           log("Your health is now: " + health);
           log("");
+
         } else if (choice === "r") {
-          log("You turn and run back through the Dream Gate...");
+          log("You turn and RUN back through the Dream Gate!");
           log("The shadows laugh as you escape.");
-          log("GAME OVER (Coward's Ending)");
+          log("GAME OVER — Coward's Ending");
           return;
         } else {
           log("Please type L, H, or R.");
@@ -191,7 +185,7 @@
         }
       }
 
-      // ---- After battle ----
+      // ----------- AFTER BATTLE -----------
       if (health <= 0) {
         log("");
         log("Your strength fails you...");
@@ -200,17 +194,17 @@
       } else if (enemyHealth <= 0) {
         log("");
         log("You have defeated the " + enemyName + "!");
-        const potionHeal = 15;
-        log("You find a small glowing potion on the ground.");
-        log("You drink it and restore " + potionHeal + " health.");
-        health += potionHeal;
+
+        const heal = 15;
+        log("You find a glowing potion and drink it.");
+        log("You restore " + heal + " health.");
+        health += heal;
+
         log("Your health is now: " + health);
         log("");
         log("You survive this encounter... for now.");
       }
     }
-
-    startBtn.addEventListener("click", playGame);
   </script>
 </body>
 </html>
