@@ -1,114 +1,195 @@
-Console.WriteLine("Welcome to the Dream Gate...");
-// Ask name + intro all in one box
-const playerName = prompt(
-  "Welcome to the Dream Gate...\n\n" +
-  "You feel a strange energy in the air.\n\n" +
-  "What is your name, traveler?"
-);
-string playerName  = Console.ReadLine();
-Console.WriteLine("Greetings, " +  playerName  + ".");
-int health = 100;
-Console.WriteLine("Your health is: " + health);
-Console.WriteLine("You stand before two doors...");
-Console.WriteLine("1 - Enter the blue door");
-Console.WriteLine("2 - Enter the dark door");
-Console.WriteLine("Which door do you choose?");
-string choice  = Console.ReadLine();
-if (choice == "1")
-{
-    Console.WriteLine("you step ino a glowing blue realm of calm energy...");
-
-    int heal = 10;
-    health = health + heal;
-    Console.WriteLine("The blue light heals you for " + heal + " points.");
-    Console.WriteLine("Your health is now: " + health);
-}
-else
-{
-    Console.WriteLine("The darkness whispers as the door closes behind you...");
-
-    int damage = 20;
-    health = health - damage;
-
-    Console.WriteLine("Something claws at you in the dark. You lose " + damage + " health.");
-    Console.WriteLine("Your health is now: " + health);
-}
-
-Console.WriteLine();
-Console.WriteLine("A shadowy creature appears in front of you!");
-
-
-string enemyName = "Shadow Beast";
-int enemyHealth = 50;
-int enemyDamage = 30;
-
-Console.WriteLine("Enemy: " + enemyName);
-Console.WriteLine("Enemy health: " + enemyHealth);
-
-Console.WriteLine();
-Console.WriteLine("Do you want to (A)ttack or (R)un?");
-string action = Console.ReadLine();
-
-if (action == "A" || action == "a")
-{
-    Console.WriteLine("You swing at the " + enemyName + "!");
-
-    int playerDamage = 20;
-    enemyHealth = enemyHealth - playerDamage;
-
-    Console.WriteLine("You deal " + playerDamage + " damage.");
-    Console.WriteLine("The enemy's health is now: " + enemyHealth);
-
-    Console.WriteLine("The " + enemyName + " strikes back!");
-    health = health - enemyDamage;
-
-    Console.WriteLine("You take " + enemyDamage + " damage.");
-    Console.WriteLine("Your health is now: " + health);
-
-    // 🛑 RIGHT HERE — immediate death check
-    if (health <= 0)
-    {
-        Console.WriteLine();
-        Console.WriteLine("Your vision fades...");
-        Console.WriteLine("You collapse at the Dream Gate.");
-        Console.WriteLine("GAME OVER");
-        return; // stops the game here
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dream Gate Game</title>
+  <style>
+    body {
+      background: #050816;
+      color: #e0e4ff;
+      font-family: Consolas, "Courier New", monospace;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
     }
 
-    // 🟢 Only happens if still alive
-    Console.WriteLine();
-    Console.WriteLine("You find a small glowing potion on the ground.");
+    #game {
+      max-width: 600px;
+      width: 100%;
+      background: rgba(10, 20, 40, 0.9);
+      border-radius: 8px;
+      padding: 16px;
+      border: 2px solid #4cc9f0;
+      box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
+      white-space: pre-wrap;
+    }
 
-    int potionHeal = 15;
-    health += potionHeal;
+    h1 {
+      margin-top: 0;
+      color: #4cc9f0;
+      font-size: 1.4rem;
+      text-align: center;
+    }
 
-    Console.WriteLine("You drink it and restore " + potionHeal + " health.");
-    Console.WriteLine("Your health is now: " + health);
-}
- 
+    button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      background: #4cc9f0;
+      border: none;
+      border-radius: 4px;
+      color: #050816;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-else
-{
-    Console.WriteLine("You turn and run as fast as you can!");
-    Console.WriteLine("The " + enemyName + "fades back into the shadows...");
-}
-    Console.WriteLine();
+    button:hover {
+      filter: brightness(1.1);
+    }
 
-if (health <= 0)
-{
-    Console.WriteLine("Your strength fails you...");
-    Console.WriteLine("You collapse at the Dream Gate.");
-    Console.WriteLine("GAME OVER");
-}
-else
-{
-    Console.WriteLine("You survive this encounter...for now.");
-}
+    #gameText {
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h1>Dream Gate</h1>
+    <div id="gameText">
+Welcome to the Dream Gate.
+Press "Start Game" to begin.
+    </div>
+    <button id="startButton" onclick="playGame()">Start Game</button>
+  </div>
 
+  <script>
+    function append(text) {
+      const game = document.getElementById("gameText");
+      game.textContent += "\n" + text;
+    }
 
+    function playGame() {
+      const game = document.getElementById("gameText");
+      game.textContent = ""; // clear screen
 
-    
+      let health = 100;
 
+      // 1) Ask name (include intro in the box)
+      const playerName = prompt(
+        "Welcome to the Dream Gate...\n\n" +
+        "You feel a strange energy in the air.\n\n" +
+        "What is your name, traveler?"
+      );
 
+      if (!playerName) {
+        game.textContent = "You remain nameless. The Dream Gate fades...\nGAME OVER";
+        return;
+      }
 
-  
+      append("Welcome to the Dream Gate...");
+      append("Greetings, " + playerName + ".");
+      append("Your health is: " + health);
+
+      // 2) Door choice – include door text inside the prompt
+      const doorChoice = prompt(
+        "You stand before two doors...\n\n" +
+        "1 - Enter the blue door (calm, glowing light)\n" +
+        "2 - Enter the dark door (whispers in the shadows)\n\n" +
+        "Which door do you choose? (1 or 2)"
+      );
+
+      if (doorChoice === "1") {
+        const heal = 10;
+        health += heal;
+        append("");
+        append("You step into a glowing blue realm of calm energy...");
+        append("The blue light heals you for " + heal + " points.");
+        append("Your health is now: " + health);
+      } else if (doorChoice === "2") {
+        const damage = 20;
+        health -= damage;
+        append("");
+        append("The darkness whispers as the door closes behind you...");
+        append("Something claws at you in the dark. You lose " + damage + " health.");
+        append("Your health is now: " + health);
+      } else {
+        append("");
+        append("You hesitate too long. The Dream Gate vanishes.");
+        append("GAME OVER");
+        return;
+      }
+
+      // 3) Enemy appears
+      append("");
+      append("A shadowy creature appears in front of you!");
+      const enemyName = "Shadow Beast";
+      let enemyHealth = 50;
+      const playerDamage = 20;
+      const enemyDamage = 30;
+
+      append("Enemy: " + enemyName);
+      append("Enemy health: " + enemyHealth);
+      append("");
+
+      // 4) Attack or run – show status inside the prompt
+      const action = prompt(
+        "A " + enemyName + " appears!\n\n" +
+        "Your health: " + health + "\n" +
+        "Enemy health: " + enemyHealth + "\n\n" +
+        "Do you want to (A)ttack or (R)un?"
+      );
+
+      if (!action) {
+        append("");
+        append("You freeze, unable to choose. The dream slips away...");
+        append("GAME OVER");
+        return;
+      }
+
+      if (action.toLowerCase() === "a") {
+        // Player attacks
+        append("You swing at the " + enemyName + "!");
+        enemyHealth -= playerDamage;
+        append("You deal " + playerDamage + " damage.");
+        append("The enemy's health is now: " + enemyHealth);
+
+        // Enemy strikes back
+        append("");
+        append("The " + enemyName + " strikes back!");
+        health -= enemyDamage;
+        append("You take " + enemyDamage + " damage.");
+        append("Your health is now: " + health);
+
+        if (health <= 0) {
+          append("");
+          append("Your vision fades...");
+          append("You collapse at the Dream Gate.");
+          append("GAME OVER");
+          return;
+        }
+
+        // Potion
+        append("");
+        append("You find a small glowing potion on the ground.");
+        const potionHeal = 15;
+        health += potionHeal;
+        append("You drink it and restore " + potionHeal + " health.");
+        append("Your health is now: " + health);
+        append("");
+        append("You survive this encounter...for now.");
+      } else if (action.toLowerCase() === "r") {
+        append("");
+        append("You turn and run back through the Dream Gate...");
+        append("The shadows laugh as you escape.");
+        append("GAME OVER (Coward's Ending)");
+      } else {
+        append("");
+        append("You hesitate, unsure what to do.");
+        append("The Dream Gate closes.");
+        append("GAME OVER");
+      }
+    }
+  </script>
+</body>
+</html>
