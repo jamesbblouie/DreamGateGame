@@ -1,179 +1,149 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Dream Gate Game</title>
-  <style>
-    body {
-      background: #0b0816;
-      color: #e0f4ff;
-      font-family: Consolas, "Courier New", monospace;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 20px;
-    }
+// See https://aka.ms/new-console-template for more information
+Console.WriteLine("Welcome to the Dream Gate...");
+Console.WriteLine("What is your name, traveler?");
+string playerName = Console.ReadLine();
+Console.WriteLine("Greetings, " + playerName + ".");
 
-    #game {
-      max-width: 600px;
-      width: 100%;
-      background: rgba(10, 20, 40, 0.9);
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
-      white-space: pre-wrap;
-    }
+int health = 100;
+Console.WriteLine("Your health is: " + health);
 
-    h1 {
-      margin-top: 0;
-      color: #4cc9f0;
-      font-size: 1.4rem;
-      text-align: center;
-    }
+Console.WriteLine("You stand before two doors...");
+Console.WriteLine("1 - Enter the blue door");
+Console.WriteLine("2 - Enter the dark door");
+Console.WriteLine("Which door do you choose?");
+string choice = Console.ReadLine();
 
-    button {
-      margin-top: 12px;
-      padding: 8px 16px;
-      background: #4cc9f0;
-      border: none;
-      border-radius: 4px;
-      color: #0b0816;
-      font-weight: bold;
-      cursor: pointer;
-    }
+if (choice == "1")
+{
+    Console.WriteLine("You step into a glowing blue realm of calm energy...");
 
-    button:hover {
-      filter: brightness(1.1);
-    }
+    int heal = 10;
+    health = health + heal;
+    Console.WriteLine("The blue light heals you for " + heal + " points.");
+    Console.WriteLine("Your health is now: " + health);
+}
+else
+{
+    Console.WriteLine("The darkness whispers as the door closes behind you...");
 
-    #output {
-      margin-top: 8px;
-      font-size: 0.95rem;
-    }
-  </style>
-</head>
-<body>
-  <div id="game">
-    <h1>Dream Gate Game</h1>
-    <button id="startBtn">Start Game</button>
-    <div id="output"></div>
-  </div>
+    int damage = 20;
+    health = health - damage;
 
-  <script>
-    const output = document.getElementById("output");
-    const startBtn = document.getElementById("startBtn");
+    Console.WriteLine("Something claws at you in the dark. You lose " + damage + " health.");
+    Console.WriteLine("Your health is now: " + health);
+}
 
-    function log(text) {
-      output.textContent += text + "\n";
-    }
+Console.WriteLine();
+Console.WriteLine("A shadowy creature appears in front of you!");
 
-    function clearOutput() {
-      output.textContent = "";
-    }
+string enemyName = "Shadow Beast";
+int enemyHealth = 50;
+int enemyDamage = 30;
 
-    function runGame() {
-      clearOutput();
+Random rng = new Random(); // makes random numbers for heavy attack
 
-      // ---- Intro & name ----
-      let playerName = prompt(
-        "Welcome to the Dream Gate...\n\n" +
-        "You feel a strange energy in the air.\n" +
-        "What is your name, traveler?"
-      );
+Console.WriteLine("Enemy: " + enemyName);
+Console.WriteLine("Enemy health: " + enemyHealth);
+Console.WriteLine();
 
-      if (!playerName) {
-        playerName = "traveler";
-      }
+// ---------- BATTLE LOOP ----------
+while (enemyHealth > 0 && health > 0)
+{
+    Console.WriteLine("Do you want to (L)ight attack, (H)eavy attack, or (R)un?");
+    string action = Console.ReadLine();
 
-      let health = 100;
+    if (action == "L" || action == "l")
+    {
+        // LIGHT ATTACK: smaller damage, always hits
+        int playerDamage = 15;
 
-      log("Welcome to the Dream Gate...");
-      log("Greetings, " + playerName + ".");
-      log("Your health is: " + health);
-      log("");
+        Console.WriteLine("You use a light attack on the " + enemyName + "!");
+        Console.WriteLine("You deal " + playerDamage + " damage.");
 
-      // ---- Door choice ----
-      let doorChoice = prompt(
-        "You stand before two doors...\n\n" +
-        "1 - Enter the blue door\n" +
-        "2 - Enter the dark door\n\n" +
-        "Which door do you choose? (1 or 2)"
-      );
-
-      if (doorChoice === "1") {
-        log("You step into a glowing blue realm of calm energy...");
-        let heal = 10;
-        health += heal;
-        log("The blue light heals you for " + heal + " points.");
-        log("Your health is now: " + health);
-      } else {
-        log("The darkness whispers as the door closes behind you...");
-        log("Something claws at you in the dark. You lose 20 health.");
-        let dmg = 20;
-        health -= dmg;
-        log("Your health is now: " + health);
-      }
-
-      log("");
-
-      // ---- Enemy appears ----
-      let enemyName = "Shadow Beast";
-      let enemyHealth = 50;
-      let playerDamage = 20;
-      let enemyDamage = 30;
-
-      log("A shadowy creature appears in front of you!");
-      log("Enemy: " + enemyName);
-      log("Enemy health: " + enemyHealth);
-      log("");
-
-      // ---- Attack or run ----
-      let action = prompt(
-        "A " + enemyName + " blocks your path!\n\n" +
-        "Do you want to:\n" +
-        "(A)ttack\n" +
-        "(R)un\n\n" +
-        "Type A or R."
-      );
-
-      if (action === "A" || action === "a") {
-        log("You swing at the " + enemyName + "!");
-        log("You deal " + playerDamage + " damage.");
         enemyHealth -= playerDamage;
-        log("The enemy's health is now: " + enemyHealth);
-        log("");
+        Console.WriteLine("The enemy's health is now: " + enemyHealth);
+        Console.WriteLine();
 
-        log("The " + enemyName + " strikes back!");
-        log("You take " + enemyDamage + " damage.");
-        health -= enemyDamage;
-        log("Your health is now: " + health);
-        log("");
-
-        if (health <= 0) {
-          log("Your vision fades...");
-          log("You collapse at the Dream Gate.");
-          log("GAME OVER");
-          return;
+        if (enemyHealth <= 0)
+        {
+            break; // enemy died, leave the loop
         }
 
-        // Potion if still alive
-        log("You find a small glowing potion on the ground.");
-        log("You drink it and restore 15 health.");
-        let potionHeal = 15;
-        health += potionHeal;
-        log("Your health is now: " + health);
-        log("");
-        log("You survive this encounter... for now.");
-      } else {
-        // Player ran away
-        log("You turn and run back through the Dream Gate...");
-        log("The shadows laugh as you escape.");
-        log("GAME OVER (Coward's Ending)");
-      }
+        // Enemy strikes back (normal damage)
+        Console.WriteLine("The " + enemyName + " strikes back!");
+        Console.WriteLine("You take " + enemyDamage + " damage.");
+        health -= enemyDamage;
+        Console.WriteLine("Your health is now: " + health);
+        Console.WriteLine();
     }
+    else if (action == "H" || action == "h")
+    {
+        // HEAVY ATTACK: strong but might miss
+        int hitChance = rng.Next(0, 100); // random number 0–99
 
-    startBtn.addEventListener("click", runGame);
-  </script>
-</body>
-</html>
+        if (hitChance < 70)
+        {
+            // 70% chance to hit
+            int playerDamage = 30;
+            Console.WriteLine("You charge up a HEAVY attack!");
+            Console.WriteLine("You smash into the " + enemyName + " for " + playerDamage + " damage!");
+            enemyHealth -= playerDamage;
+            Console.WriteLine("The enemy's health is now: " + enemyHealth);
+        }
+        else
+        {
+            // 30% chance to miss
+            Console.WriteLine("You swing a HEAVY attack... but you MISS!");
+        }
+
+        Console.WriteLine();
+
+        if (enemyHealth <= 0)
+        {
+            break; // enemy died, leave the loop
+        }
+
+        // Enemy hits harder after a heavy attempt
+        int heavyEnemyDamage = enemyDamage + 10;
+        Console.WriteLine("The " + enemyName + " counters your heavy move!");
+        Console.WriteLine("You take " + heavyEnemyDamage + " damage.");
+        health -= heavyEnemyDamage;
+        Console.WriteLine("Your health is now: " + health);
+        Console.WriteLine();
+    }
+    else if (action == "R" || action == "r")
+    {
+        Console.WriteLine("You turn and run back through the Dream Gate...");
+        Console.WriteLine("The shadows laugh as you escape.");
+        Console.WriteLine("GAME OVER (Coward's Ending)");
+        return; // end the program
+    }
+    else
+    {
+        Console.WriteLine("Please type L for light attack, H for heavy attack, or R to run.");
+        Console.WriteLine();
+    }
+}
+
+// ---------- AFTER THE LOOP ----------
+if (health <= 0)
+{
+    Console.WriteLine();
+    Console.WriteLine("Your strength fails you...");
+    Console.WriteLine("You collapse at the Dream Gate.");
+    Console.WriteLine("GAME OVER");
+}
+else if (enemyHealth <= 0)
+{
+    Console.WriteLine();
+    Console.WriteLine("You have defeated the " + enemyName + "!");
+
+    int potionHeal = 15;
+    Console.WriteLine("You find a small glowing potion on the ground.");
+    Console.WriteLine("You drink it and restore " + potionHeal + " health.");
+    health += potionHeal;
+    Console.WriteLine("Your health is now: " + health);
+    Console.WriteLine();
+    Console.WriteLine("You survive this encounter... for now.");
+}
+
