@@ -2,209 +2,530 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Dream Gate Game</title>
-
+  <title>Dream Gate: Astral Hallway</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      background: #0b0816;
-      color: #e0f4ff;
-      font-family: Consolas, "Courier New", monospace;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e3a8a 0%, #020617 55%, #000 100%);
+      color: #e5e7eb;
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 20px;
       min-height: 100vh;
     }
 
-    #game {
-      max-width: 600px;
+    .game-container {
+      max-width: 700px;
       width: 100%;
-      background: rgba(10, 20, 40, 0.9);
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
-      white-space: pre-wrap;
+      padding: 1.5rem;
+      box-sizing: border-box;
     }
 
-    button {
-      margin-top: 12px;
-      padding: 8px 16px;
-      background: #4cc9f0;
+    h1 {
+      text-align: center;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 1.3rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #a5b4fc;
+      margin-bottom: 1rem;
+    }
+
+    #log {
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      height: 380px;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(129, 140, 248, 0.3);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    #log p {
+      margin: 0.25rem 0;
+    }
+
+    #prompt {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      color: #bfdbfe;
+      min-height: 1.2em;
+    }
+
+    .input-row {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    #playerInput {
+      flex: 1;
+      padding: 0.5rem 0.6rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      font-size: 1rem;
+    }
+
+    #submitBtn {
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.5rem;
       border: none;
-      border-radius: 4px;
-      color: #0b0816;
-      font-weight: bold;
+      background: linear-gradient(to right, #2563eb, #4f46e5);
+      color: white;
+      font-weight: 600;
       cursor: pointer;
+      font-size: 0.95rem;
+      white-space: nowrap;
     }
 
-    button:hover {
-      filter: brightness(1.1);
+    #submitBtn:active {
+      transform: scale(0.98);
+    }
+
+    .stats {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #93c5fd;
+    }
+
+    .tagline {
+      margin-top: 0.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #64748b;
     }
   </style>
 </head>
-
 <body>
-  <div id="game">
-    <h1>Dream Gate Game</h1>
-    <button id="startBtn">Start Game</button>
-    <pre id="log"></pre>
+  <div class="game-container">
+    <h1>Dream Gate</h1>
+    <div class="subtitle">Blue Prince • Astral Hallway • Star-Touched Battles</div>
+
+    <div id="log"></div>
+    <div id="prompt"></div>
+    <div class="stats" id="stats"></div>
+
+    <div class="input-row">
+      <input id="playerInput" type="text" autocomplete="off" />
+      <button id="submitBtn">Enter</button>
+    </div>
+
+    <div class="tagline">
+      Tip: Type your choice and press Enter. Works on phone and computer.
+    </div>
   </div>
 
   <script>
+    // Core game state
+    const game = {
+      state: "askName",
+      playerName: "",
+      health: 100,
+      enemyName: "",
+      enemyHealth: 0,
+      enemyDamage: 0,
+      blessing: "None",
+      bonusLightDamage: 0,
+      bonusHealing: 0,
+      damageReduction: 0,
+      isPoisoned: false,
+      poisonDamage: 5,
+    };
+
     const logEl = document.getElementById("log");
-    const startBtn = document.getElementById("startBtn");
+    const promptEl = document.getElementById("prompt");
+    const statsEl = document.getElementById("stats");
+    const inputEl = document.getElementById("playerInput");
+    const buttonEl = document.getElementById("submitBtn");
 
-    function log(text = "") {
-      logEl.textContent += text + "\n";
+    function rng100() {
+      return Math.floor(Math.random() * 100) + 1; // 1-100
     }
 
-    function clearLog() {
-      logEl.textContent = "";
+    function rng4() {
+      return Math.floor(Math.random() * 4) + 1; // 1-4
     }
 
-    startBtn.addEventListener("click", playGame);
+    function log(text) {
+      const p = document.createElement("p");
+      p.textContent = text;
+      logEl.appendChild(p);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
 
-    function playGame() {
-      clearLog();
+    function setPrompt(text) {
+      promptEl.textContent = text;
+    }
 
-      // ----------- NAME -----------
-      let name = prompt(
-        "Welcome to the Dream Gate...\n\n" +
-        "You feel a strange energy in the air.\n\n" +
-        "What is your name, traveler?"
-      );
+    function updateStats(extraEnemyName, extraEnemyHealth) {
+      let s = "";
+      s += "You: " + game.playerName + " • Health: " + game.health;
+      if (extraEnemyName) {
+        s += "  |  " + extraEnemyName + " Health: " + extraEnemyHealth;
+      }
+      if (game.blessing && game.blessing !== "None") {
+        s += "  |  Star Blessing: " + game.blessing;
+      }
+      statsEl.textContent = s;
+    }
 
-      if (!name || name.trim() === "") name = "Traveler";
+    function endGame(message) {
+      log(message);
+      setPrompt("The dream rests here. Refresh the page to begin again.");
+      game.state = "ended";
+    }
 
-      let health = 100;
+    function startGame() {
+      log("A blue gate shimmers in the dark.");
+      log("A quiet voice whispers from the other side...");
+      log(" \"Welcome to the Dream Gate.\"");
+      setPrompt("What is your name, traveler?");
+      updateStats();
+      inputEl.focus();
+    }
 
-      log("Welcome to the Dream Gate...");
-      log("Greetings, " + name + ".");
-      log("Your health is: " + health);
+    // --- Flow Helpers ---
+
+    function startDoorChoice() {
+      log("");
+      log("Your health is: " + game.health + ".");
+      log("You stand before two doors, each rimmed with faint blue light.");
+      log("  1 - A calm, glowing blue door");
+      log("  2 - A dark, whispering door");
+      setPrompt("Type 1 or 2 and press Enter.");
+      game.state = "doorChoice";
+      updateStats();
+    }
+
+    function startShadowBeast() {
+      game.enemyName = "Shadow Beast";
+      game.enemyHealth = 50;
+      game.enemyDamage = 30;
+
+      log("");
+      log("The path tightens, and something moves in the dark.");
+      log("A " + game.enemyName + " steps forward, its eyes glowing faint blue.");
+      log("It lowers its head, ready to strike.");
+      log("");
+      game.state = "battle1_action";
+      setPrompt("Choose: (L)ight attack, (H)eavy attack, or (R)un away, then press Enter.");
+      updateStats(game.enemyName, game.enemyHealth);
+    }
+
+    function startCelestialHallway() {
+      log("");
+      log("The creature dissolves into drifting smoke, leaving only silence.");
+      log("The world softens, and a long hallway unfolds before you.");
+      log("Blue starlight pools along the floor. Constellations twist overhead, watching.");
       log("");
 
-      // ----------- DOOR CHOICE -----------
-      const doorChoice = prompt(
-        "You stand before two doors...\n\n" +
-        "1 - Enter the blue door (calm glowing light)\n" +
-        "2 - Enter the dark door (distant whispers)\n\n" +
-        "Which door do you choose? (1 or 2)"
-      );
+      log("Three constellations glow brighter than the rest:");
+      log("  A - Aries — A burning horn of starlight, fierce and sharp. (Stronger light attacks)");
+      log("  P - Pisces — Two shimmering fish swirling in gentle orbits. (Stronger healing)");
+      log("  C - Capricorn — A mountain goat of stone and stars, unshaken. (Reduced damage taken)");
+      log("");
+      setPrompt("Choose your star blessing: A, P, or C, then press Enter.");
+      game.state = "chooseBlessing";
+      updateStats();
+    }
 
-      if (doorChoice === "1") {
-        const heal = 10;
-        log("You step into a glowing blue realm of calm energy...");
-        log("The blue light heals you for " + heal + " points.");
-        health += heal;
-        log("Your health is now: " + health);
+    function startAstralWarden() {
+      game.enemyName = "Astral Warden";
+      game.enemyHealth = 70;
+      game.enemyDamage = 20;
+      game.isPoisoned = false;
+
+      log("");
+      log("The constellations rearrange themselves.");
+      if (game.blessing === "Aries") {
+        log("A horn of blue light glows just above you. Your strikes hum with quiet fury.");
+      } else if (game.blessing === "Pisces") {
+        log("Blue water flows around your ankles in a slow, gentle tide.");
+      } else if (game.blessing === "Capricorn") {
+        log("You feel as if a small mountain stands at your back, steady and solid.");
       } else {
-        const dmg = 20;
-        log("The darkness whispers as the door closes behind you...");
-        log("Something claws at you. You lose " + dmg + " health.");
-        health -= dmg;
-        log("Your health is now: " + health);
+        log("The stars flicker uncertainly, offering no clear favor.");
       }
 
       log("");
-      log("A shadowy creature appears in front of you!");
-
-      const enemyName = "Shadow Beast";
-      let enemyHealth = 50;
-      let enemyDamage = 30;
-
-      log("Enemy: " + enemyName);
-      log("Enemy health: " + enemyHealth);
+      log("From the starlight ahead, a figure pulls itself free.");
+      log("It is made of blue constellations and drifting dust: the " + game.enemyName + ".");
+      log("It raises a hand made of stars and tilts its head, studying you.");
       log("");
+      game.state = "battle2_action";
+      setPrompt("Choose: (L)ight attack, (H)eavy attack, or (R)un away, then press Enter.");
+      updateStats(game.enemyName, game.enemyHealth);
+    }
 
-      // ----------- BATTLE LOOP -----------
-      while (enemyHealth > 0 && health > 0) {
-        const action = prompt(
-          "Your health: " + health + "\n" +
-          enemyName + " health: " + enemyHealth + "\n\n" +
-          "(L)ight attack - safe, small hit\n" +
-          "(H)eavy attack - big hit, risk of miss\n" +
-          "(R)un away\n\n" +
-          "Type L, H, or R:"
-        );
+    // --- Input Handling ---
 
-        if (!action) {
-          log("You hesitate...");
-          continue;
-        }
+    function handleInput(rawInput) {
+      const input = rawInput.trim();
+      if (!input || game.state === "ended") return;
 
-        const choice = action.toLowerCase();
-
-        if (choice === "l") {
-          // LIGHT ATTACK
-          const dmg = 15;
-          log("You use a LIGHT attack!");
-          log("You deal " + dmg + " damage.");
-          enemyHealth -= dmg;
-          log(enemyName + " health: " + enemyHealth);
-          log("");
-
-          if (enemyHealth <= 0) break;
-
-          log("The " + enemyName + " strikes back!");
-          log("You take " + enemyDamage + " damage.");
-          health -= enemyDamage;
-          log("Your health is now: " + health);
-          log("");
-
-        } else if (choice === "h") {
-          // HEAVY ATTACK (70% hit chance)
-          const hitRoll = Math.floor(Math.random() * 100);
-          if (hitRoll < 70) {
-            const dmg = 30;
-            log("You unleash a HEAVY attack!");
-            log("You deal " + dmg + " damage!");
-            enemyHealth -= dmg;
-            log(enemyName + " health: " + enemyHealth);
-          } else {
-            log("Your HEAVY attack MISSES!");
-          }
-          log("");
-
-          if (enemyHealth <= 0) break;
-
-          const counter = enemyDamage + 10;
-          log("The " + enemyName + " counters HARD!");
-          log("You take " + counter + " damage.");
-          health -= counter;
-          log("Your health is now: " + health);
-          log("");
-
-        } else if (choice === "r") {
-          log("You turn and RUN back through the Dream Gate!");
-          log("The shadows laugh as you escape.");
-          log("GAME OVER — Coward's Ending");
-          return;
-        } else {
-          log("Please type L, H, or R.");
-          log("");
-        }
-      }
-
-      // ----------- AFTER BATTLE -----------
-      if (health <= 0) {
-        log("");
-        log("Your strength fails you...");
-        log("You collapse at the Dream Gate.");
-        log("GAME OVER");
-      } else if (enemyHealth <= 0) {
-        log("");
-        log("You have defeated the " + enemyName + "!");
-
-        const heal = 15;
-        log("You find a glowing potion and drink it.");
-        log("You restore " + heal + " health.");
-        health += heal;
-
-        log("Your health is now: " + health);
-        log("");
-        log("You survive this encounter... for now.");
+      if (game.state === "askName") {
+        handleName(input);
+      } else if (game.state === "doorChoice") {
+        handleDoorChoice(input);
+      } else if (game.state === "battle1_action") {
+        handleBattle1(input);
+      } else if (game.state === "chooseBlessing") {
+        handleBlessing(input);
+      } else if (game.state === "battle2_action") {
+        handleBattle2(input);
       }
     }
+
+    function handleName(input) {
+      game.playerName = input || "Traveler";
+      log("");
+      log(" \"Greetings, " + game.playerName + ".\"");
+      log("A soft warmth settles into your chest. Your starting health is 100.");
+      startDoorChoice();
+    }
+
+    function handleDoorChoice(input) {
+      if (input === "1") {
+        log("");
+        log("You step through the blue door.");
+        log("The air is cool and calm. A gentle glow wraps around you.");
+        const heal = 10;
+        game.health += heal;
+        log("You feel lighter. The light heals you for " + heal + " points.");
+      } else if (input === "2") {
+        log("");
+        log("You push through the dark door.");
+        log("Whispers coil around your ears, tugging at your courage.");
+        const damage = 20;
+        game.health -= damage;
+        log("Something unseen rakes across you. You take " + damage + " damage.");
+      } else {
+        log("The doors do not move. They are waiting for a clear choice: 1 or 2.");
+        setPrompt("Type 1 or 2 and press Enter.");
+        return;
+      }
+
+      log("Your health is now: " + game.health + ".");
+      if (game.health <= 0) {
+        log("");
+        endGame("The dream crushes you before it even begins. GAME OVER.");
+        return;
+      }
+
+      startShadowBeast();
+    }
+
+    function handleBattle1(input) {
+      const action = input.toUpperCase();
+      if (!["L", "H", "R"].includes(action)) {
+        log("Your hesitation buys you nothing. Choose L, H, or R.");
+        setPrompt("Choose: (L)ight attack, (H)eavy attack, or (R)un away, then press Enter.");
+        return;
+      }
+
+      if (action === "R") {
+        log("");
+        log("You turn and run from the " + game.enemyName + ".");
+        endGame("The dream pulls away as you flee. COWARD ENDING.");
+        return;
+      }
+
+      // Player's move
+      if (action === "L") {
+        const damageDealt = 15;
+        game.enemyHealth -= damageDealt;
+        log("");
+        log("You step forward, striking with a clean, focused swing.");
+        log("You deal " + damageDealt + " damage to the " + game.enemyName + ".");
+      } else if (action === "H") {
+        const roll = rng100();
+        log("");
+        if (roll <= 70) {
+          const heavyDamage = 30;
+          game.enemyHealth -= heavyDamage;
+          log("You commit to a heavy strike. The hit lands hard for " + heavyDamage + " damage!");
+        } else {
+          log("You lunge too wide. Your heavy strike passes through empty air.");
+        }
+      }
+
+      if (game.enemyHealth <= 0) {
+        log("");
+        log("The " + game.enemyName + " shudders and collapses into smoke.");
+        log("You have defeated the " + game.enemyName + "!");
+        const potionHeal = 15;
+        game.health += potionHeal;
+        log("On the ground, you find a small, glowing potion. You drink it.");
+        log("It heals you for " + potionHeal + " points.");
+        log("Your health is now: " + game.health + ".");
+        log("You survive this encounter... for now.");
+        startCelestialHallway();
+        return;
+      }
+
+      // Enemy strikes back
+      const counterDamage = (action === "H") ? game.enemyDamage + 10 : game.enemyDamage;
+      game.health -= counterDamage;
+      log("");
+      log("The " + game.enemyName + " surges forward, claws dragging across you.");
+      log("You take " + counterDamage + " damage.");
+      log("Your health is now: " + game.health + ".");
+
+      if (game.health <= 0) {
+        log("");
+        endGame("The " + game.enemyName + " overwhelms you. You fall into endless dark. GAME OVER.");
+        return;
+      }
+
+      updateStats(game.enemyName, game.enemyHealth);
+      setPrompt("Choose: (L)ight attack, (H)eavy attack, or (R)un away, then press Enter.");
+    }
+
+    function handleBlessing(input) {
+      const choice = input.toUpperCase();
+      if (choice === "A") {
+        game.blessing = "Aries";
+        game.bonusLightDamage = 5;
+        log("");
+        log("The horn of Aries ignites above you, a burning arc of blue fire.");
+        log("Your light attacks feel sharper, more certain.");
+      } else if (choice === "P") {
+        game.blessing = "Pisces";
+        game.bonusHealing = 10;
+        log("");
+        log("Two blue fish swirl lazily around you in a ring of light.");
+        log("You sense that future healing will run deeper.");
+      } else if (choice === "C") {
+        game.blessing = "Capricorn";
+        game.damageReduction = 5;
+        log("");
+        log("A faint outline of a mountain goat appears behind you, carved from stars.");
+        log("Incoming blows already feel a little duller.");
+      } else {
+        game.blessing = "None";
+        log("");
+        log("The constellations flicker and dim. No star answers your call.");
+      }
+
+      startAstralWarden();
+    }
+
+    function handleBattle2(input) {
+      const action = input.toUpperCase();
+      if (!["L", "H", "R"].includes(action)) {
+        log("The stars wait for a clearer intent. Choose L, H, or R.");
+        setPrompt("Choose: (L)ight attack, (H)eavy attack, or (R)un away, then press Enter.");
+        return;
+      }
+
+      // Poison tick at the start of your turn
+      if (game.isPoisoned) {
+        game.health -= game.poisonDamage;
+        log("Starlit poison curls through your veins. You take " + game.poisonDamage + " poison damage.");
+        log("Your health is now: " + game.health + ".");
+        if (game.health <= 0) {
+          endGame("The poison finishes what the Astral Warden began. GAME OVER.");
+          return;
+        }
+      }
+
+      if (action === "R") {
+        log("");
+        log("You turn and rush back down the hallway, away from the Astral Warden.");
+        log("Behind you, it laughs softly, like distant bells.");
+        endGame("The dream unravels as you flee. COWARD ENDING.");
+        return;
+      }
+
+      // Player's move
+      if (action === "L") {
+        const baseDamage = 15;
+        const totalDamage = baseDamage + game.bonusLightDamage;
+        log("");
+        log("You breathe once, then strike with clear, precise light.");
+        log("You deal " + totalDamage + " damage to the " + game.enemyName + ".");
+        game.enemyHealth -= totalDamage;
+      } else if (action === "H") {
+        const roll = rng100();
+        log("");
+        if (roll <= 70) {
+          const heavyDamage = 30;
+          game.enemyHealth -= heavyDamage;
+          log("You commit to a heavy swing. It connects with a thunderous impact for " + heavyDamage + " damage!");
+        } else {
+          log("You swing wide. The starlight body of the " + game.enemyName + " reforms just out of reach.");
+        }
+      }
+
+      if (game.enemyHealth <= 0) {
+        log("");
+        log("The " + game.enemyName + " flickers, then bursts into drifting blue stars.");
+        // Final healing with Pisces bonus
+        const finalHeal = 20 + game.bonusHealing;
+        game.health += finalHeal;
+        log("A gentle rain of starlight falls around you, soaking into your skin.");
+        log("You are healed for " + finalHeal + " points.");
+        log("Your final health is: " + game.health + ".");
+        log("");
+        endGame("You step beyond the Astral Hallway. Somewhere ahead, the true Dream Gate waits... TO BE CONTINUED.");
+        return;
+      }
+
+      // Enemy turn
+      log("");
+      log("The " + game.enemyName + " gestures, stars tightening into a sharp pattern.");
+      let actualDamage = game.enemyDamage - game.damageReduction;
+      if (actualDamage < 0) actualDamage = 0;
+      game.health -= actualDamage;
+      log("Starlit claws rake across you. You take " + actualDamage + " damage.");
+      log("Your health is now: " + game.health + ".");
+
+      // Poison chance (25%) if not already poisoned
+      if (!game.isPoisoned) {
+        const rollPoison = rng4(); // 1-4
+        if (rollPoison === 1) {
+          game.isPoisoned = true;
+          log("Blue venom drips from the stars and sinks into your skin. You have been poisoned.");
+        }
+      }
+
+      if (game.health <= 0) {
+        endGame("The " + game.enemyName + " scatters your light into the sky. GAME OVER.");
+        return;
+      }
+
+      updateStats(game.enemyName, game.enemyHealth);
+      setPrompt("Choose: (L)ight attack, (H)eavy attack, or (R)un away, then press Enter.");
+    }
+
+    // Hook up UI
+    buttonEl.addEventListener("click", () => {
+      const value = inputEl.value;
+      inputEl.value = "";
+      handleInput(value);
+      inputEl.focus();
+    });
+
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        buttonEl.click();
+      }
+    });
+
+    // Start the game
+    startGame();
   </script>
 </body>
 </html>
