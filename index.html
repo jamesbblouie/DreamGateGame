@@ -6,7 +6,7 @@
   <style>
     body {
       background: #0b0816;
-      color: #e0e4ff;
+      color: #e0f4ff;
       font-family: Consolas, "Courier New", monospace;
       display: flex;
       justify-content: center;
@@ -16,12 +16,12 @@
     }
 
     #game {
-      max-width: 700px;
+      max-width: 600px;
       width: 100%;
       background: rgba(10, 20, 40, 0.9);
       border-radius: 8px;
       padding: 16px;
-      box-shadow: 0 0 20px rgba(76, 201, 240, 0.5);
+      box-shadow: 0 0 20px rgba(76, 201, 240, 0.4);
       white-space: pre-wrap;
     }
 
@@ -38,7 +38,7 @@
       background: #4cc9f0;
       border: none;
       border-radius: 4px;
-      color: #080816;
+      color: #0b0816;
       font-weight: bold;
       cursor: pointer;
     }
@@ -46,83 +46,107 @@
     button:hover {
       filter: brightness(1.1);
     }
+
+    #output {
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
   </style>
 </head>
 <body>
   <div id="game">
     <h1>Dream Gate Game</h1>
-    <pre id="text"></pre>
     <button id="startBtn">Start Game</button>
+    <div id="output"></div>
   </div>
 
   <script>
-    const textEl = document.getElementById("text");
+    const output = document.getElementById("output");
     const startBtn = document.getElementById("startBtn");
 
-    function log(line = "") {
-      textEl.textContent += line + "\n";
+    function log(text) {
+      output.textContent += text + "\n";
     }
 
-    function ask(question) {
-      return window.prompt(question);
+    function clearOutput() {
+      output.textContent = "";
     }
 
     function runGame() {
-      textEl.textContent = ""; // clear old text
+      clearOutput();
+
+      // ---- Intro & name ----
+      let playerName = prompt(
+        "Welcome to the Dream Gate...\n\n" +
+        "You feel a strange energy in the air.\n" +
+        "What is your name, traveler?"
+      );
+
+      if (!playerName) {
+        playerName = "traveler";
+      }
+
+      let health = 100;
 
       log("Welcome to the Dream Gate...");
-      const playerName = ask("What is your name, traveler?");
-      const nameToUse = playerName && playerName.trim() !== "" ? playerName.trim() : "Traveler";
-
-      log("Greetings, " + nameToUse + ".");
-      let health = 100;
+      log("Greetings, " + playerName + ".");
       log("Your health is: " + health);
       log("");
-      log("You stand before two doors...");
-      log("1 - Enter the blue door");
-      log("2 - Enter the dark door");
 
-      const doorChoice = ask("Which door do you choose? (1 or 2)");
+      // ---- Door choice ----
+      let doorChoice = prompt(
+        "You stand before two doors...\n\n" +
+        "1 - Enter the blue door\n" +
+        "2 - Enter the dark door\n\n" +
+        "Which door do you choose? (1 or 2)"
+      );
 
       if (doorChoice === "1") {
-        log("");
         log("You step into a glowing blue realm of calm energy...");
-        const heal = 10;
+        let heal = 10;
         health += heal;
         log("The blue light heals you for " + heal + " points.");
         log("Your health is now: " + health);
       } else {
-        log("");
         log("The darkness whispers as the door closes behind you...");
-        const damage = 20;
-        health -= damage;
-        log("Something claws at you in the dark. You lose " + damage + " health.");
+        log("Something claws at you in the dark. You lose 20 health.");
+        let dmg = 20;
+        health -= dmg;
         log("Your health is now: " + health);
       }
 
       log("");
-      log("A shadowy creature appears in front of you!");
-      const enemyName = "Shadow Beast";
-      let enemyHealth = 50;
-      const enemyDamage = 30;
-      const playerDamage = 20;
 
+      // ---- Enemy appears ----
+      let enemyName = "Shadow Beast";
+      let enemyHealth = 50;
+      let playerDamage = 20;
+      let enemyDamage = 30;
+
+      log("A shadowy creature appears in front of you!");
       log("Enemy: " + enemyName);
       log("Enemy health: " + enemyHealth);
       log("");
 
-      const action = ask("Do you want to (A)ttack or (R)un?");
+      // ---- Attack or run ----
+      let action = prompt(
+        "A " + enemyName + " blocks your path!\n\n" +
+        "Do you want to:\n" +
+        "(A)ttack\n" +
+        "(R)un\n\n" +
+        "Type A or R."
+      );
 
       if (action === "A" || action === "a") {
         log("You swing at the " + enemyName + "!");
-        enemyHealth -= playerDamage;
         log("You deal " + playerDamage + " damage.");
+        enemyHealth -= playerDamage;
         log("The enemy's health is now: " + enemyHealth);
         log("");
 
         log("The " + enemyName + " strikes back!");
-        health -= enemyDamage;
         log("You take " + enemyDamage + " damage.");
+        health -= enemyDamage;
         log("Your health is now: " + health);
         log("");
 
@@ -130,16 +154,19 @@
           log("Your vision fades...");
           log("You collapse at the Dream Gate.");
           log("GAME OVER");
-        } else {
-          const potionHeal = 15;
-          log("You find a small glowing potion on the ground.");
-          log("You drink it and restore " + potionHeal + " health.");
-          health += potionHeal;
-          log("Your health is now: " + health);
-          log("");
-          log("You survive this encounter... for now.");
+          return;
         }
+
+        // Potion if still alive
+        log("You find a small glowing potion on the ground.");
+        log("You drink it and restore 15 health.");
+        let potionHeal = 15;
+        health += potionHeal;
+        log("Your health is now: " + health);
+        log("");
+        log("You survive this encounter... for now.");
       } else {
+        // Player ran away
         log("You turn and run back through the Dream Gate...");
         log("The shadows laugh as you escape.");
         log("GAME OVER (Coward's Ending)");
